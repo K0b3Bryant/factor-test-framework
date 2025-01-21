@@ -1,5 +1,5 @@
 import pandas as pd
-from utils import validate_inputs, perform_factor_analysis
+from utils import validate_inputs, perform_factor_analysis, perform_nonlinear_analysis
 from config import CONFIG
 
 def main():
@@ -17,9 +17,17 @@ def main():
 
     try:
         validated_returns, validated_factors = validate_inputs(returns_data, factors_data)
-        results = perform_factor_analysis(validated_returns, validated_factors)
-        print("\nFactor Analysis Results:")
-        print(results)
+
+        # Linear Factor Analysis
+        print("\nLinear Factor Analysis Results:")
+        linear_results = perform_factor_analysis(validated_returns, validated_factors)
+        print(linear_results)
+
+        # Nonlinear Factor Analysis
+        print("\nNonlinear Factor Analysis Results:")
+        nonlinear_results = perform_nonlinear_analysis(validated_returns, validated_factors)
+        print(nonlinear_results)
+
     except Exception as e:
         print(f"Error: {e}")
 
