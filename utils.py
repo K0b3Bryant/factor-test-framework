@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
 import statsmodels.api as sm
+from sklearn.linear_model import Lasso, Ridge
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
 from config import CONFIG
 
 def validate_inputs(returns_data: pd.DataFrame, factors_data: pd.DataFrame):
@@ -45,3 +48,27 @@ def perform_factor_analysis(returns: pd.DataFrame, factors: pd.DataFrame):
         'Parameter': significant_results,
         'P-Value': model.pvalues.loc[significant_results.index]
     }).rename_axis('Factor').reset_index()
+
+def perform_nonlinear_analysis(returns: pd.DataFrame, factors: pd.DataFrame):
+    returns_values = returns['Returns']
+    factors_values = factors.drop(columns=['Date'])
+
+    # Standardize factors
+    scaler = StandardScaler()
+    factors_values = scaler.fit_transform(factors_values)
+
+    # Lasso Regression
+    lasso = Lasso(alpha=CONFIG['lasso_alpha'])
+    lasso.fit(factors_values, returns_values)
+
+    # Ridge Regression
+    ridge = Ridge(alpha=CONFIG['ridge_alpha'])
+    ridge.fit(factors_values, returns_values)
+
+    # Combine results
+    results = {
+        'Lasso Coefficients': lasso.coef_,
+        'Ridge Coefficients': ridge.coef_
+    }
+
+    return pd.DataFrame(results, index=[f'Factor{i+1}' for i in range(factors_values.shape[1])])
